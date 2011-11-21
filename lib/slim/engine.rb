@@ -10,7 +10,7 @@ module Slim
     # This overwrites some temple default options.
     set_default_options :pretty => false,
                         :attr_wrapper => '"',
-                        :attr_delimiter => {'class' => ' '},
+                        :attr_delimiter => {'class' => ' ', 'id' => '-'},
                         :generator => Temple::Generators::ArrayBuffer
 
     #
