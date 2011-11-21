@@ -12,7 +12,8 @@ module Slim
       [:slim, :embedded, String, Expression]
 
     HTMLAttr <<
-      [:slim, :attr, String, Bool, String]
+      [:slim, :attr, String, Bool, String] |
+      [:slim, :attrhash, String]
 
   end
 end

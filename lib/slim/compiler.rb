@@ -85,5 +85,13 @@ module Slim
       end
       [:html, :attr, name, [:escape, escape, value]]
     end
+
+    def on_slim_attrhash(code)
+      [[:html, :attr, "a", "n"],
+       [:html, :attr, "b", "n"]]
+       
+      #[:block, "(#{code}).each do |k,v|", [:dynamic, '"#{k}"="#{v}"']]
+    end
+
   end
 end

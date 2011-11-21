@@ -73,6 +73,7 @@ module Slim
 
     DELIMITER_REGEX = /\A[\(\[\{]/
     ATTR_NAME_REGEX = '\A\s*(\w[:\w-]*)'
+    ATTR_HASH_REGEX = '\A\s*\*'
 
     if RUBY_VERSION > '1.9'
       CLASS_ID_REGEX = /\A(#|\.)([\w\u00c0-\uFFFF][\w:\u00c0-\uFFFF-]*)/
@@ -337,20 +338,25 @@ module Slim
       while true
         # Parse attributes
         attr_regex = delimiter ? /#{ATTR_NAME_REGEX}(=|\s|(?=#{Regexp.escape delimiter}))/ : /#{ATTR_NAME_REGEX}=/
-        while @line =~ attr_regex
+        while @line =~ attr_regex || @line =~ /\A\s*\*/
           @line = $'
-          name = $1
-          if delimiter && $2 != '='
-            attributes << [:slim, :attr, name, false, 'true']
-          elsif @line =~ /\A["']/
-            # Value is quoted (static)
-            @line = $'
-            attributes << [:html, :attr, name, [:slim, :interpolate, parse_quoted_attribute($&)]]
+          if $1
+            name = $1
+            if delimiter && $2 != '='
+              attributes << [:slim, :attr, name, false, 'true']
+            elsif @line =~ /\A["']/
+              # Value is quoted (static)
+              @line = $'
+              attributes << [:html, :attr, name, [:slim, :interpolate, parse_quoted_attribute($&)]]
+            else
+              # Value is ruby code
+              escape = @line[0] != ?=
+              @line.slice!(0) unless escape
+              attributes << [:slim, :attr, name, escape, parse_ruby_attribute(delimiter)]
+            end
           else
-            # Value is ruby code
-            escape = @line[0] != ?=
-            @line.slice!(0) unless escape
-            attributes << [:slim, :attr, name, escape, parse_ruby_attribute(delimiter)]
+            attr_hash = parse_ruby_attribute(delimiter)
+            attributes << [:slim, :attrhash, attr_hash]
           end
         end
 
