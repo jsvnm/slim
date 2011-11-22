@@ -89,6 +89,7 @@ module Slim
     def on_slim_dattrs(*dattrs)
       tmp = unique_name
       val = unique_name
+      del = unique_name
       [:multi,
        [:code, "#{tmp} = Hash.new{|h,k| h[k]=[]}"],
        *dattrs.map {|attr|
@@ -96,14 +97,22 @@ module Slim
          when [:html, :attr]
            [:multi,
             [:capture, val, compile(attr[3])],
-            [:code, "#{tmp}[:'#{attr[2]}'] << #{val}"]]
+            [:code, "#{tmp}['#{attr[2]}'] << #{val}"]]
          when [:slim, :attrhash]
            h=attr[2]
-           [:code, "#{h}.each{|k,v| #{tmp}[k] << v }"]
+           [:code, "#{h}.each{|k,v| #{tmp}[k.to_s] << v }"]
          end
        },
        [:block, "#{tmp}.each do |k, v|",
-        [:dynamic, "\" \#{k}=\\#{options[:attr_wrapper]}\#{v.join'-'}\\#{options[:attr_wrapper]}\""]]
+        [:multi,
+         [:static, ' '],
+         [:dynamic, "k"],
+         [:static, "=#{options[:attr_wrapper]}"],
+         [:case, 'k',
+          *options[:attr_delimiter].map{|a,d| ["\'#{a}\'", [:dynamic, "v.join('#{d}')"]] },
+          [:else, [:dynamic, "\"\#{v.last}\""]]],
+         [:static, options[:attr_wrapper]]]
+       ]
       ]
     end
   end
