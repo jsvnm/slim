@@ -87,10 +87,8 @@ module Slim
     end
 
     def on_slim_attrhash(code)
-      [[:html, :attr, "a", "n"],
-       [:html, :attr, "b", "n"]]
-       
-      #[:block, "(#{code}).each do |k,v|", [:dynamic, '"#{k}"="#{v}"']]
+      [:block, "(#{code}).each do |k, v|",
+       [:dynamic, "\" \#{k}=#{options[:attr_wrapper]}\#{v}#{options[:attr_wrapper]}\""]]
     end
 
   end
