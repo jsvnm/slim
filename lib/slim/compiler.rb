@@ -86,10 +86,25 @@ module Slim
       [:html, :attr, name, [:escape, escape, value]]
     end
 
-    def on_slim_attrhash(code)
-      [:block, "(#{code}).each do |k, v|",
-       [:dynamic, "\" \#{k}=#{options[:attr_wrapper]}\#{v}#{options[:attr_wrapper]}\""]]
+    def on_slim_dattrs(*dattrs)
+      tmp = unique_name
+      val = unique_name
+      [:multi,
+       [:code, "#{tmp} = Hash.new{|h,k| h[k]=[]}"],
+       *dattrs.map {|attr|
+         case attr[0,2]
+         when [:html, :attr]
+           [:multi,
+            [:capture, val, compile(attr[3])],
+            [:code, "#{tmp}[:'#{attr[2]}'] << #{val}"]]
+         when [:slim, :attrhash]
+           h=attr[2]
+           [:code, "#{h}.each{|k,v| #{tmp}[k] << v }"]
+         end
+       },
+       [:block, "#{tmp}.each do |k, v|",
+        [:dynamic, "\" \#{k}=\\#{options[:attr_wrapper]}\#{v.join'-'}\\#{options[:attr_wrapper]}\""]]
+      ]
     end
-
   end
 end

@@ -357,6 +357,7 @@ module Slim
           else
             attr_hash = parse_ruby_attribute(delimiter)
             attributes << [:slim, :attrhash, attr_hash]
+            attributes[0,2] = [:slim, :dattrs]
           end
         end
 
